@@ -7,9 +7,9 @@ Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le pr
 
 ### Ajouté
 
-- Configuration automatique de la carte Ethernet en IP fixe `172.20.0.xx` (passerelle `172.20.0.1`).
+- Configuration automatique de la carte Ethernet en IP fixe `<préfixe>.xx` (passerelle `<passerelle>`).
 - Test de connexion Internet (passerelle, DNS, accès web) avec nouvelle tentative.
-- Création du point d'accès Wi-Fi `MY-DFS-HOTSPOT` (WPA2) via l'API Windows `NetworkOperatorTetheringManager`.
+- Création du point d'accès Wi-Fi (WPA2) via l'API Windows `NetworkOperatorTetheringManager`.
 - Réglage du point d'accès à 128 appareils maximum et désactivation de la veille.
 - Configuration et réparation automatiques du partage de connexion Internet (ICS).
 - Page web locale avec QR code Wi-Fi, identifiants, état du hotspot et liste des appareils connectés.

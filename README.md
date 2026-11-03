@@ -25,9 +25,9 @@
 
 ## Fonctionnalités
 
-- **IP fixe sur Ethernet** : `172.20.0.xx` / `255.255.255.0`, passerelle `172.20.0.1`, DNS `8.8.8.8` et `1.1.1.1`.
+- **IP fixe sur Ethernet** : `<préfixe>.xx` / `255.255.255.0`, passerelle `<passerelle>`, DNS `8.8.8.8` et `1.1.1.1`.
 - **Test de connexion** automatique : passerelle, résolution DNS et accès web, avec nouvel essai si besoin.
-- **Point d'accès Wi-Fi Windows** : SSID `MY-DFS-HOTSPOT`, WPA2, jusqu'à **128 appareils** (veille désactivée).
+- **Point d'accès Wi-Fi Windows** : SSID configurable, WPA2, jusqu'à **128 appareils** (veille désactivée).
 - **Partage de connexion Internet (ICS)** configuré et réparé automatiquement (services Windows, pare-feu, redémarrage du partage).
 - **Page web locale** (`http://localhost:8080`) : QR code Wi-Fi, identifiants, état du hotspot, appareils connectés et bouton de relance.
 - **Application autonome** `AgriGeek-Hotspot.exe` avec icône, plus des raccourcis « AgriGeek Hotspot » et « Réparer le partage Internet ».
@@ -40,7 +40,7 @@
 | PowerShell | Windows PowerShell 5.1 |
 | Matériel | Une carte Ethernet **et** une carte Wi-Fi compatible point d'accès |
 | Droits | Administrateur (élévation automatique) |
-| Réseau | Câble Ethernet relié à une passerelle `172.20.0.1` |
+| Réseau | Câble Ethernet relié à la passerelle définie dans `$Gateway` |
 | Compilation | Connexion Internet au premier lancement (installation du module `ps2exe`) |
 
 ## Démarrage rapide
@@ -49,7 +49,7 @@
 2. Décompressez l'archive dans un dossier de votre choix.
 3. Double-cliquez sur **`AgriGeek Hotspot.exe`** (ou `Lancer-DFS.bat`).
 4. Acceptez l'invite d'élévation administrateur.
-5. Saisissez le **numéro de l'appareil** sur le réseau (2 à 254) → l'adresse devient `172.20.0.xx`.
+5. Saisissez le **numéro de l'appareil** sur le réseau (2 à 254) → l'adresse devient `<préfixe>.xx`.
 6. Attendez la validation de la connexion Internet et le démarrage du point d'accès.
 7. La page locale s'ouvre : scannez le **QR code** avec un téléphone pour rejoindre le Wi-Fi.
 
@@ -61,15 +61,15 @@
 Internet
    │
    ▼
-Passerelle 172.20.0.1
+Passerelle du réseau
    │
    ▼
-PC Windows ── Ethernet 172.20.0.xx (IP fixe)
+PC Windows ── Ethernet <préfixe>.xx (IP fixe)
    │
    ├── Partage de connexion Internet (ICS)
    │
    ▼
-Point d'accès Wi-Fi « MY-DFS-HOTSPOT » ── 192.168.137.1
+Point d'accès Wi-Fi « <SSID> » ── 192.168.137.1
    │
    ├── Téléphones / tablettes / PC
    └── Page locale http://localhost:8080 (QR code + état)
@@ -103,18 +103,18 @@ Les binaires (`AgriGeek-Hotspot.exe`, archives) sont exclus de Git et publiés d
 
 Les paramètres se trouvent en haut de [`src/Configurer-DFS.ps1`](src/Configurer-DFS.ps1) :
 
-| Variable | Valeur par défaut | Description |
+| Variable | Valeur | Description |
 |---|---|---|
-| `$Gateway` | `172.20.0.1` | Passerelle du réseau Ethernet |
-| `$NetPrefix` | `172.20.0.` | Préfixe de l'adresse IP fixe |
+| `$Gateway` | `<passerelle>` | Passerelle du réseau Ethernet |
+| `$NetPrefix` | `<préfixe>.` | Préfixe de l'adresse IP fixe |
 | `$PrefixLen` | `24` | Masque de sous-réseau (`255.255.255.0`) |
 | `$DnsServers` | `8.8.8.8`, `1.1.1.1` | Serveurs DNS |
-| `$HotspotSsid` | `MY-DFS-HOTSPOT` | Nom du réseau Wi-Fi |
-| `$HotspotPass` | `123DFSIFIW` | Mot de passe Wi-Fi (WPA2) |
+| `$HotspotSsid` | `<SSID>` | Nom du réseau Wi-Fi |
+| `$HotspotPass` | *(à définir)* | Mot de passe Wi-Fi (WPA2) |
 | `$HotspotMaxPeers` | `128` | Nombre maximum d'appareils |
 | `$WebPort` | `8080` | Port de la page locale (ports suivants testés si occupé) |
 
-> ⚠️ Modifiez le mot de passe par défaut avant un déploiement réel, puis recompilez l'exécutable.
+> ⚠️ Définissez vos propres SSID, mot de passe et adressage dans le script (ne les publiez pas), puis recompilez l'exécutable.
 
 ## Modes de lancement
 
@@ -156,7 +156,7 @@ Version actuelle de l'exécutable : **1.0.0.0**.
 | Problème | Piste |
 |---|---|
 | « Aucune carte Ethernet physique détectée » | Vérifiez le pilote et que la carte n'est pas désactivée. |
-| La passerelle ne répond pas | Vérifiez le câble, le switch et que la passerelle est bien `172.20.0.1`. |
+| La passerelle ne répond pas | Vérifiez le câble, le switch et la valeur de `$Gateway`. |
 | DNS injoignable | Le réseau bloque peut-être `8.8.8.8` / `1.1.1.1` ; changez `$DnsServers`. |
 | Partage impossible (`0x80040201`) | Le Pare-feu Windows Defender est souvent remplacé par un antivirus tiers : le partage ICS ne peut pas fonctionner sans lui. |
 | Point d'accès impossible | Le Wi-Fi doit être activé et la carte/pilote doit supporter le point d'accès. |
