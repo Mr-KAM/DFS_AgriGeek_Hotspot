@@ -1,0 +1,20 @@
+# Binaires et archives (publiés via les Releases)
+*.exe
+*.zip
+dist/
+
+# Raccourcis propres à chaque machine
+*.lnk
+
+# Système
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
+
+# Divers
+*.log
