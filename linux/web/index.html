@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgriGeek Hotspot · DFS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#0b0f1e; --grid:rgba(120,140,220,.07); --card:#121831; --line:#252e55;
+  --text:#eef1fb; --muted:#8a93b8; --navy:#232a63; --blue:#4a6bc4; --blue-hi:#7894e8;
+  --green:#6cc070; --red:#e06c75;
+  --mono:'Space Mono',ui-monospace,Consolas,monospace;
+  --sans:'Space Grotesk','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:72px 72px}
+.deco{position:fixed;background:var(--green);z-index:0}
+.d1{width:88px;height:88px;left:6%;top:11%}
+.d2{width:54px;height:54px;left:36%;top:7%}
+.d3{width:36px;height:100px;left:48%;top:18%}
+.d4{width:48px;height:124px;right:36%;top:0}
+.d5{width:66px;height:66px;left:13%;bottom:12%}
+.d6{width:112px;height:38px;left:30%;bottom:6%}
+.side{position:fixed;right:-14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:90px;z-index:0;opacity:.85}
+.side span{font:700 150px/0.8 var(--mono);color:var(--blue)}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:40px 24px;min-height:100vh;
+  display:grid;grid-template-columns:1.15fr .85fr;gap:64px;align-items:center}
+.logo{display:flex;align-items:center;gap:6px}
+.logo .b{display:grid;place-items:center;font:700 var(--s,30px)/1 var(--mono);color:#fff;width:var(--w,60px);height:var(--w,60px)}
+.logo .b1{background:var(--navy);box-shadow:inset 0 0 0 1px #3a4390}
+.logo .b2{background:var(--blue)}
+.logo .b3{background:var(--green)}
+.logo .lt{margin-left:12px;font:700 var(--ts,17px)/1.05 var(--sans);letter-spacing:.02em}
+.logo.big{--w:108px;--s:56px;--ts:30px}
+.top{position:absolute;top:28px;left:24px}
+.eyebrow{font:400 15px var(--mono);letter-spacing:.42em;color:var(--blue-hi);text-transform:uppercase;margin-bottom:22px}
+h1{font-size:clamp(40px,5.8vw,82px);font-weight:700;line-height:1.02;letter-spacing:-.025em;margin-bottom:38px}
+h1 em{font-style:normal;color:var(--green)}
+.lead{margin-top:34px;max-width:540px;font-size:21px;line-height:1.5;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.chip{font:400 12px var(--mono);letter-spacing:.08em;border:1px solid var(--line);background:rgba(18,24,49,.7);padding:8px 12px;color:var(--muted)}
+.chip b{color:var(--text);font-weight:700}
+.card{position:relative;background:var(--card);border:1px solid var(--line);padding:44px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.card::after{content:"";position:absolute;left:-7px;bottom:-7px;width:30px;height:80px;border-left:7px solid var(--green);border-bottom:7px solid var(--green);width:30px}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.card-h h2{font-size:30px;font-weight:700;letter-spacing:-.01em}
+.card-h small{display:block;margin-top:8px;font:400 13px var(--mono);letter-spacing:.32em;color:var(--muted)}
+.card-h svg{width:34px;height:34px;color:var(--blue-hi)}
+.status{display:flex;align-items:center;gap:12px;padding:16px 20px;border-left:4px solid var(--green);background:rgba(108,192,112,.12);font-size:17px;margin-bottom:26px}
+.status .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(108,192,112,.6);animation:pulse 1.8s infinite}
+.status.off{border-color:var(--red);background:rgba(224,108,117,.13)}
+.status.off .dot{background:var(--red);animation:none}
+.status button{margin-left:auto}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(108,192,112,0)}100%{box-shadow:0 0 0 0 rgba(108,192,112,0)}}
+.qr{display:flex;justify-content:center;margin-bottom:26px}
+.qr-box{background:#fff;padding:16px;line-height:0}
+.qr-box img,.qr-box canvas{display:block}
+.qr-fallback{font:400 13px var(--mono);color:#333;width:220px;line-height:1.5;text-align:center;padding:60px 10px}
+.field{margin-bottom:14px}
+.field label{display:block;font:400 11px var(--mono);letter-spacing:.3em;color:var(--muted);margin-bottom:6px}
+.row{display:flex;align-items:center;border:1px solid var(--line);background:#0e1328}
+.row .v{flex:1;padding:14px 16px;font:700 18px var(--mono);letter-spacing:.06em;overflow:hidden;text-overflow:ellipsis}
+.row.focus{border-color:var(--blue-hi);box-shadow:0 0 0 1px var(--blue-hi)}
+.ib{border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);width:52px;align-self:stretch;cursor:pointer;display:grid;place-items:center}
+.ib:hover{color:var(--text);background:#161d3c}
+.ib svg{width:18px;height:18px}
+.btn{border:0;background:var(--blue);color:#fff;font:700 13px var(--mono);letter-spacing:.3em;padding:10px 16px;cursor:pointer}
+.btn:hover{background:#5578d4}
+hr{border:0;border-top:1px solid var(--line);margin:24px 0 18px}
+.clients-h{display:flex;justify-content:space-between;font-size:16px}
+.clients-h span{font:700 15px var(--mono);color:var(--green)}
+ul{list-style:none;margin-top:12px;max-height:140px;overflow:auto}
+li{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+li code{font:400 12px var(--mono);color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;margin-top:10px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#0b0f1e;font:700 13px var(--mono);letter-spacing:.15em;padding:12px 20px;transition:transform .25s;z-index:10}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media (max-width:980px){
+  .wrap{grid-template-columns:1fr;gap:40px;padding-top:110px}
+  .side,.d3,.d4{display:none}
+  .logo.big{--w:72px;--s:38px;--ts:21px}
+  .card{padding:28px}
+}
+</style>
+</head>
+<body>
+<div class="deco d1"></div><div class="deco d2"></div><div class="deco d3"></div>
+<div class="deco d4"></div><div class="deco d5"></div><div class="deco d6"></div>
+<div class="side"><span>D</span><span>F</span><span>S</span></div>
+
+<div class="top">
+  <div class="logo"><span class="b b1">D</span><span class="b b2">F</span><span class="b b3">S</span>
+  <span class="lt">DIGITAL<br>FARMING<br>SCHOOL</span></div>
+</div>
+
+<main class="wrap">
+  <section>
+    <p class="eyebrow">Point d'accès Wi-Fi</p>
+    <h1>Welcome to The <em>AgriGeek</em> Hotspot Linux.</h1>
+    <div class="logo big"><span class="b b1">D</span><span class="b b2">F</span><span class="b b3">S</span>
+      <span class="lt">DIGITAL<br>FARMING<br>SCHOOL</span></div>
+    <p class="lead">Scannez le QR code avec votre téléphone pour rejoindre le réseau Wi-Fi de la Digital Farming School.</p>
+    <div class="chips">
+      <span class="chip">ETHERNET <b id="c-eth"></b></span>
+      <span class="chip">PASSERELLE <b id="c-gw"></b></span>
+      <span class="chip">DNS <b id="c-dns"></b></span>
+      <span class="chip">HOTSPOT <b id="c-hs"></b></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-h">
+      <div><h2>CONNEXION WI-FI</h2><small>SCANNER · REJOINDRE</small></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8.8a15 15 0 0 1 20 0"/><path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>
+    </div>
+
+    <div class="status" id="status"><span class="dot"></span><span id="status-t">Point d'accès actif</span></div>
+
+    <div class="qr"><div class="qr-box" id="qr"></div></div>
+
+    <div class="field">
+      <label>RÉSEAU (SSID)</label>
+      <div class="row focus"><span class="v" id="ssid"></span>
+        <button class="ib" data-copy="ssid" title="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></button>
+      </div>
+    </div>
+    <div class="field">
+      <label>MOT DE PASSE</label>
+      <div class="row"><span class="v" id="pass"></span>
+        <button class="ib" id="eye" title="Afficher / masquer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button class="ib" data-copy="password" title="Copier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></button>
+      </div>
+    </div>
+    <div class="field">
+      <label>SÉCURITÉ</label>
+      <div class="row"><span class="v">WPA2 · PERSONNEL</span></div>
+    </div>
+
+    <hr>
+    <div class="clients-h">Appareils connectés <span id="count">0</span></div>
+    <ul id="clients"></ul>
+    <p class="empty" id="empty">Aucun appareil pour le moment.</p>
+  </section>
+</main>
+<div class="toast" id="toast">COPIÉ</div>
+
+<script>
+const C = {{CONFIG}};
+const $ = id => document.getElementById(id);
+$('ssid').textContent = C.ssid;
+$('c-eth').textContent = C.ethernet; $('c-gw').textContent = C.gateway;
+$('c-dns').textContent = C.dns; $('c-hs').textContent = C.hotspotIp;
+
+let shown = false;
+const mask = () => $('pass').textContent = shown ? C.password : '•'.repeat(C.password.length);
+mask();
+$('eye').onclick = () => { shown = !shown; mask(); };
+
+const toast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1400); };
+document.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => {
+  try { await navigator.clipboard.writeText(C[b.dataset.copy]); toast('COPIÉ'); } catch { toast('COPIE IMPOSSIBLE'); }
+});
+
+const esc = s => s.replace(/([\\;,:"])/g, '\\$1');
+const wifi = `WIFI:T:WPA;S:${esc(C.ssid)};P:${esc(C.password)};;`;
+if (window.QRCode) {
+  new QRCode($('qr'), { text: wifi, width: 220, height: 220, colorDark: '#0b0f1e', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+} else {
+  $('qr').innerHTML = '<div class="qr-fallback">QR code indisponible.<br>Saisissez le nom du réseau et le mot de passe ci-dessous.</div>';
+}
+
+const escHtml = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function refresh() {
+  try {
+    const s = await (await fetch('/api/status', { cache: 'no-store' })).json();
+    const on = s.state === 'On';
+    $('status').className = 'status' + (on ? '' : ' off');
+    $('status-t').innerHTML = on ? "Point d'accès actif" : "Point d'accès arrêté";
+    if (!on && !$('restart')) {
+      const b = document.createElement('button'); b.id = 'restart'; b.className = 'btn'; b.textContent = 'RELANCER';
+      b.onclick = async () => { b.disabled = true; b.textContent = '...'; await fetch('/api/start', { method: 'POST' }); b.remove(); refresh(); };
+      $('status').appendChild(b);
+    }
+    if (on && $('restart')) $('restart').remove();
+    $('count').textContent = s.max ? `${s.count} / ${s.max}` : `${s.count}`;
+    const list = s.clients || [];
+    $('clients').innerHTML = list.map(c => `<li><span>${escHtml(c.name || 'Appareil')}</span><code>${escHtml(c.mac)}</code></li>`).join('');
+    $('empty').style.display = list.length ? 'none' : 'block';
+  } catch {
+    $('status').className = 'status off';
+    $('status-t').textContent = 'Serveur local arrêté';
+  }
+}
+refresh(); setInterval(refresh, 4000);
+</script>
+</body>
+</html>

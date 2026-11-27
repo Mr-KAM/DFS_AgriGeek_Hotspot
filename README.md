@@ -18,6 +18,7 @@
 - [Modes de lancement](#modes-de-lancement)
 - [Page web locale](#page-web-locale)
 - [Compiler l'application (.exe)](#compiler-lapplication-exe)
+- [Version Linux (Manjaro / i3)](#version-linux-manjaro--i3)
 - [Dépannage](#dépannage)
 - [Licence](#licence)
 
@@ -89,6 +90,12 @@ DFS_AgriGeek_Hotspot/
 ├── build/
 │   ├── Construire-EXE.ps1    # Compilation ps2exe + création des raccourcis
 │   └── Construire-EXE.bat    # Lanceur de compilation
+├── linux/
+│   ├── agrigeek-hotspot.sh   # Version Linux (NetworkManager)
+│   ├── install.sh            # Commande + lanceurs .desktop
+│   └── web/
+│       ├── index.html        # Page locale (QR code)
+│       └── server.py         # Serveur de la page (Python, bibliothèque standard)
 ├── Lancer-DFS.bat            # Lancement normal
 ├── Reparer-Partage.bat       # Réparation du partage Internet
 ├── README.md
@@ -150,6 +157,54 @@ Le script :
 3. crée les raccourcis « AgriGeek Hotspot » et « Réparer le partage Internet » dans le dossier du projet et sur le Bureau.
 
 Version actuelle de l'exécutable : **1.0.0.0**.
+
+## Version Linux (Manjaro / i3)
+
+Le dossier [`linux/`](linux/) reprend les mêmes étapes avec **NetworkManager** (Manjaro, Arch ; testé sous i3).
+
+| Élément | Détail |
+|---|---|
+| Paquets | `networkmanager`, `dnsmasq`, `iw`, `curl`, `python` (optionnel : `ldns` pour `drill`) |
+| Droits | Utilisateur normal ; `sudo` seulement pour ouvrir le pare-feu (ufw / Docker), une fois |
+| Matériel | Carte Ethernet + carte Wi-Fi compatible mode AP (le point d'accès est en 2,4 GHz) |
+
+```bash
+linux/install.sh            # une fois : commande « agrigeek-hotspot » + lanceurs (i3-dmenu-desktop, rofi)
+agrigeek-hotspot            # configuration complète, dans un terminal
+```
+
+| Commande | Effet |
+|---|---|
+| `agrigeek-hotspot` | Lien Ethernet vérifié, IP fixe, test Internet, point d'accès, page web |
+| `agrigeek-hotspot --auto` | Choisit un numéro libre (200, 201… puis 2…199) avec détection de conflit |
+| `agrigeek-hotspot --ip 42` | Utilise directement `<préfixe>.42` |
+| `agrigeek-hotspot --repair` | Rouvre le pare-feu, relance le point d'accès et vérifie le partage, **sans** toucher à l'IP |
+| `agrigeek-hotspot --page` | Rouvre seulement la page web locale |
+| `agrigeek-hotspot --stop` | Arrête le point d'accès (le Wi-Fi se reconnecte à vos réseaux habituels) |
+| `agrigeek-hotspot --reset` | Supprime le profil `DFS-Ethernet`, repasse l'Ethernet en DHCP, arrête le point d'accès |
+
+Options : `--yes` (aucune question), `--no-hotspot` (Ethernet seulement), `--no-web`.
+
+Correspondance avec la version Windows :
+
+| Windows | Linux |
+|---|---|
+| IP fixe via `New-NetIPAddress` | Profil NetworkManager `DFS-Ethernet` (priorité 50, métrique 50) |
+| Détection d'adresse en double | ACD NetworkManager (`ipv4.dad-timeout`) |
+| Point d'accès mobile (WinRT) + ICS | Profil `DFS-Hotspot` en `ipv4.method shared` (dnsmasq + NAT) sur `192.168.137.1` |
+| Services Windows / pare-feu Defender | Règles `ufw` (DHCP, DNS, `ufw route`) ou `DOCKER-USER` |
+| 128 appareils maximum | Non réglable : limite fixée par le pilote Wi-Fi |
+| `HttpListener` PowerShell | `linux/web/server.py` (même page, mêmes routes `/api/status`, `/api/start`) |
+
+> Le point d'accès utilise la carte Wi-Fi : l'ordinateur se déconnecte de son réseau Wi-Fi habituel tant que le point d'accès est actif.
+
+Dépannage spécifique Linux :
+
+| Problème | Piste |
+|---|---|
+| « Lien instable : N coupures » | Le script désactive l'EEE puis limite à 100 Mb/s. Si le lien coupe encore : câble, connecteur ou prise du switch. |
+| Les téléphones se connectent mais sans Internet | Pare-feu : lancez `agrigeek-hotspot --repair` dans un terminal (mot de passe sudo). |
+| Le point d'accès ne démarre pas | `nmcli radio wifi on`, vérifiez `iw list` (mode `AP`) et que `dnsmasq` est installé. |
 
 ## Dépannage
 
